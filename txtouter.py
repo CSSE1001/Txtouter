@@ -20,7 +20,8 @@ class DisplayException(Exception):
             trace = f"{curr_element.__class__.__name__} > " + trace     
             curr_element = curr_element.get_parent() # Walk up parent relation
 
-        super().__init__(trace + message, *args, **kwargs)
+        # Strip trailing > 
+        super().__init__(trace[:-3] + ": " + message, *args, **kwargs)
 
 
 class TextDisplayElement():
@@ -523,19 +524,18 @@ class AbstractGrid(VSplitDisplay):
         cell_height = self._fixheight // dims[0]
         cell_width = self._fixwidth // dims[1]
 
+        if self._grid_just == GRID_SQUARE:
+            min_dim = min(cell_height, cell_width)
+            cell_height = min_dim
+            cell_width = min_dim
+
         self._components.clear()
         for _ in range(dims[0]):
-            if self._grid_just == GRID_SQUARE:
-                min_dim = min(cell_height, cell_width)
-                cell_height = min_dim
-                cell_width = min_dim
-
             row = HSplitDisplay(
                     [BaseDisplay(width=cell_width, height=cell_height) 
                      for _ in range(dims[1])], width = self.get_width(), 
                     height = cell_height
             )
-                
             self.add_component(row)
 
     def get_cell(self, row: int, col: int) -> BaseDisplay:
